@@ -19,12 +19,16 @@
 #define itkThreadLogger_h
 
 #include "itkLogger.h"
-#include <mutex>
-#include <atomic>
+#ifndef __wasi__
+#  include <mutex>
+#  include <atomic>
+#endif
 
 #include <string>
 #include <queue>
-#include <thread>
+#ifndef __wasi__
+#  include <thread>
+#endif
 
 namespace itk
 {
@@ -126,11 +130,15 @@ private:
   void
   InternalFlush();
 
+  std::queue<OperationType> m_OperationQ{};
+
+#ifndef __wasi__
   std::thread m_Thread{};
 
   std::atomic<bool> m_TerminationRequested{};
-
-  std::queue<OperationType> m_OperationQ{};
+#else
+  bool m_TerminationRequested{};
+#endif
 
   std::queue<std::string> m_MessageQ{};
 
@@ -138,7 +146,9 @@ private:
 
   std::queue<OutputType::Pointer> m_OutputQ{};
 
+#ifndef __wasi__
   mutable std::mutex m_Mutex{};
+#endif
 
   DelayType m_Delay{};
 

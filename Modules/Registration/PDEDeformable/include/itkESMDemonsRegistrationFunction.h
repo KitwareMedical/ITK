@@ -22,7 +22,9 @@
 #include "itkCentralDifferenceImageFunction.h"
 #include "itkWarpImageFilter.h"
 #include "ITKPDEDeformableRegistrationExport.h"
-#include <mutex>
+#ifndef __wasi__
+#  include <mutex>
+#endif
 
 namespace itk
 {
@@ -323,7 +325,9 @@ private:
   mutable double        m_SumOfSquaredChange{};
 
   /** Mutex lock to protect modification to metric. */
+#ifndef __wasi__
   mutable std::mutex m_MetricCalculationLock{};
+#endif
 };
 } // end namespace itk
 

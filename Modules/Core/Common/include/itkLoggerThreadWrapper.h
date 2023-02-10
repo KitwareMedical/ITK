@@ -20,8 +20,10 @@
 
 #include <string>
 #include <queue>
-#include <thread>
-#include <atomic>
+#ifndef __wasi__
+#  include <thread>
+#  include <atomic>
+#endif
 
 #include "itkObjectFactory.h"
 #include <mutex>
@@ -152,21 +154,27 @@ protected:
   ThreadFunction();
 
 private:
+  std::queue<OperationEnum> m_OperationQ{};
+
+#ifndef __wasi__
   std::thread m_Thread{};
 
   std::atomic<bool> m_TerminationRequested{};
+#else
+  bool m_TerminationRequested;
+#endif
 
-  std::queue<OperationEnum> m_OperationQ{};
-
-  std::queue<std::string> m_MessageQ{};
+  DelayType m_Delay{};
 
   std::queue<PriorityLevelEnum> m_LevelQ{};
 
   std::queue<typename OutputType::Pointer> m_OutputQ{};
 
-  mutable std::mutex m_Mutex{};
+  std::queue<std::string> m_MessageQ{};
 
-  DelayType m_Delay{};
+#ifndef __wasi__
+  mutable std::mutex m_Mutex{};
+#endif
 
 }; // class LoggerThreadWrapper
 
